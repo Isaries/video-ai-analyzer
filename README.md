@@ -25,3 +25,9 @@ The library uses a short-lived temporary file only during processing and deletes
 - No persistent storage to your server or cloud is performed by this library.
 
 If your environment forbids any disk writes at all (including temporary), see “Zero-Disk Environments”.
+
+# High-level goals
+- Accept uploaded videos as file-like objects or bytes in backend servers.
+- Use a short-lived temp file during processing (deleted afterward).
+- Extract frames (in memory), detect/extract audio (in memory), call OpenAI for vision and transcription, and output a final summary.
+- Provide ready-to-run examples (FastAPI, Flask, CLI) and optional Docker setup.
