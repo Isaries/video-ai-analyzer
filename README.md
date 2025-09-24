@@ -39,3 +39,71 @@ If your environment forbids any disk writes at all (including temporary), see â€
 - MoviePy, Pillow, OpenCV (headless)
 - FastAPI/Uvicorn and Flask (examples)
 - Optional Docker
+
+# Public API surface (what backend developers use)
+
+- analyze_video_file(file_obj, filename=None) -> str
+- Pass a binary file-like object and optionally the original filename (for extension inference).
+
+- analyze_video_bytes(video_bytes, filename="input.mp4") -> str
+- Pass raw bytes and a filename hint for extension inference.
+
+- start_log_capture(), get_captured_logs(), end_log_capture()
+- Optional logging helpers to stream progress back to clients.
+
+# Key behaviors and constraints
+
+- Uses OS temp directory to store a short-lived copy of the uploaded video; required by ffmpeg/ffprobe/OpenCV/MoviePy.
+- Extracted frames and audio are handled in memory; no image files are written.
+- Temporary video is deleted after processing; nothing is persisted by this library.
+- Requires ffmpeg/ffprobe in PATH for best results.
+- Reads OpenAI API key from OPENAI_API_KEY.
+
+# Build and run
+
+- Local:
+> python -m venv .venv
+> source .venv/bin/activate (Windows: .venv\Scripts\activate)
+> pip install -r requirements.txt
+> export/setx OPENAI_API_KEY
+
+- CLI:
+> python examples/cli.py demo.mp4 --name demo.mp4
+
+- FastAPI:
+> uvicorn examples.fastapi_app:app --host 0.0.0.0 --port 8000
+> curl -X POST "http://localhost:8000/analyze" -F "upload=@demo.mp4"
+
+- Flask:
+> FLASK_APP=examples.flask_app flask run --host=0.0.0.0 --port=8000
+> curl -X POST "http://localhost:8000/analyze" -F "file=@demo.mp4"
+
+# Docker usage
+
+- Build: docker build -t video-ai-analyzer .
+- Run: docker run -e OPENAI_API_KEY=$OPENAI_API_KEY -p 8000:8000 video-ai-analyzer
+- Compose:
+> docker-compose up --build
+
+# Testing suggestions
+
+- Unit tests for:
+> Extension inference and temp file creation/deletion
+> Frame timestamp generation logic
+> Logging capture utilities
+- Integration tests (mark as slow/optional):
+> Require ffmpeg and minimal sample video
+> Mock OpenAI calls or use a test account with rate-limited runs
+
+# Security and privacy notes
+
+- The library does not persist videos; it creates a temporary file during processing and deletes it afterward.
+- It sends frame images and audio snippets to OpenAI. You are responsible for informing users and complying with your policies and OpenAIâ€™s terms.
+- Validate upload types and sizes at the gateway or app layer.
+
+# Roadmap
+
+- Zero-disk (pipe-only) mode for environments with no write privileges
+- Structured output (JSON) with timestamps and entities
+- Advanced frame sampling strategies and GPU-accelerated pipelines
+- More robust error handling and retry policies
