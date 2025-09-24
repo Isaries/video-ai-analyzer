@@ -1,6 +1,0 @@
-- Python 3.10+
-- ffmpeg/ffprobe (system tools)
-- OpenAI Python SDK
-- MoviePy, Pillow, OpenCV (headless)
-- FastAPI/Uvicorn and Flask (examples)
-- Optional Docker
